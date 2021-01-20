@@ -5,7 +5,7 @@ import fr.cocoraid.babouinmalin.exceptions.UserNotFoundException;
 import fr.cocoraid.babouinmalin.model.User;
 import fr.cocoraid.babouinmalin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.hateoas.EntityModel;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @RestController
 public class UserController {
@@ -42,15 +39,9 @@ public class UserController {
 
     // Get a Single user
     @GetMapping("/users/{id}")
-    public EntityModel<User> getUserById(@PathVariable(value = "id") UUID userId) throws UserNotFoundException {
+    public User getUserById(@PathVariable(value = "id") UUID userId) throws UserNotFoundException {
         User user = userService.getUser(userId);
-        EntityModel<User> resource = EntityModel.of(user);
-        //link for example to easily remove or edit the user
-        resource.add(
-                linkTo(methodOn(this.getClass()).getAllUsers()).withRel("all-users"),
-                linkTo(methodOn(this.getClass()).deleteUser(userId)).withSelfRel()
-        );
-        return resource;
+        return user;
     }
 
     // Update user
