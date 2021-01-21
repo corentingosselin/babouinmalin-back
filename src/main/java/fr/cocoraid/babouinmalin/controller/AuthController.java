@@ -1,6 +1,7 @@
 package fr.cocoraid.babouinmalin.controller;
 
 import fr.cocoraid.babouinmalin.dao.UserRepository;
+import fr.cocoraid.babouinmalin.model.ApiResponse;
 import fr.cocoraid.babouinmalin.model.User;
 import fr.cocoraid.babouinmalin.payload.request.LoginRequest;
 import fr.cocoraid.babouinmalin.payload.request.SignupRequest;
@@ -10,10 +11,12 @@ import fr.cocoraid.babouinmalin.security.jwt.JwtUtils;
 import fr.cocoraid.babouinmalin.security.services.UserDetailsImpl;
 import fr.cocoraid.babouinmalin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -42,17 +45,27 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-        return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail()));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+
+            UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+            return ResponseEntity.ok(new JwtResponse(jwt,
+                    userDetails.getId(),
+                    userDetails.getUsername(),
+                    userDetails.getEmail()));
+        } catch(AuthenticationException e) {
+            if(e.getMessage().equalsIgnoreCase("Bad credentials"))
+                return new ResponseEntity<>("Email ou mot de passe invalide", HttpStatus.UNAUTHORIZED);
+            else {
+                return new ResponseEntity<>("Le service est temporairement inaccessible", HttpStatus.SERVICE_UNAVAILABLE);
+            }
+        }
     }
 
     @PostMapping("/register")
@@ -71,15 +84,6 @@ public class AuthController {
                 signUpRequest.getPassword());
 
         userService.createUser(user);
-
-
-      /*  User created = userService.createUser(user);
-        EntityModel<User> resource = EntityModel.of(created);
-        resource.add(
-                linkTo(methodOn(this.getClass()).getUserById(created.getId())).withSelfRel()
-        );
-        return resource;*/
-
         userRepository.save(user);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
