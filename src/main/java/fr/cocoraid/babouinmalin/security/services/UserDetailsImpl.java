@@ -2,12 +2,14 @@ package fr.cocoraid.babouinmalin.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import fr.cocoraid.babouinmalin.model.User;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.*;
 
+@Data
 public class UserDetailsImpl implements UserDetails {
 	private static final long serialVersionUID = 1L;
 
@@ -49,13 +51,7 @@ public class UserDetailsImpl implements UserDetails {
 		return authorities;
 	}
 
-	public UUID getId() {
-		return id;
-	}
 
-	public String getEmail() {
-		return email;
-	}
 
 	@Override
 	public String getPassword() {
