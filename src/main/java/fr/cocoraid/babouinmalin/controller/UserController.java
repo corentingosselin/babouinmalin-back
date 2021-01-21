@@ -3,6 +3,7 @@ package fr.cocoraid.babouinmalin.controller;
 
 import fr.cocoraid.babouinmalin.exceptions.UserNotFoundException;
 import fr.cocoraid.babouinmalin.model.User;
+import fr.cocoraid.babouinmalin.payload.response.MessageResponse;
 import fr.cocoraid.babouinmalin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,6 +20,8 @@ public class UserController {
 
     @Autowired
     UserService userService;
+
+
 
     // Get All Notes
     @GetMapping("/users")

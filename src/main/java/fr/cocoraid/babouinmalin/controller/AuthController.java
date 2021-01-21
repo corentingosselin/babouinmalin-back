@@ -57,8 +57,9 @@ public class AuthController {
 
             return ResponseEntity.ok(new JwtResponse(jwt,
                     userDetails.getId(),
-                    userDetails.getUsername(),
-                    userDetails.getEmail()));
+                    userDetails.getEmail(),
+                    userDetails.getName(),
+                    userDetails.getSurname()));
         } catch(AuthenticationException e) {
             if(e.getMessage().equalsIgnoreCase("Bad credentials"))
                 return new ResponseEntity<>("Email ou mot de passe invalide", HttpStatus.UNAUTHORIZED);
@@ -66,6 +67,11 @@ public class AuthController {
                 return new ResponseEntity<>("Le service est temporairement inaccessible", HttpStatus.SERVICE_UNAVAILABLE);
             }
         }
+    }
+
+    @PostMapping("/token")
+    public ResponseEntity<?> checkToken() {
+        return ResponseEntity.ok(new MessageResponse("User is still online"));
     }
 
     @PostMapping("/register")
