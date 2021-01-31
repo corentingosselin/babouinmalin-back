@@ -1,7 +1,7 @@
 package fr.cocoraid.babouinmalin.security.services;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import fr.cocoraid.babouinmalin.model.User;
+import fr.cocoraid.babouinmalin.model.user.User;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,7 +1,7 @@
 package fr.cocoraid.babouinmalin.security.services;
 
 import fr.cocoraid.babouinmalin.dao.UserRepository;
-import fr.cocoraid.babouinmalin.model.User;
+import fr.cocoraid.babouinmalin.model.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

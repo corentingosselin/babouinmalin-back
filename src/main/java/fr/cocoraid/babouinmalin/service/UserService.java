@@ -1,7 +1,7 @@
 package fr.cocoraid.babouinmalin.service;
 
 import fr.cocoraid.babouinmalin.exceptions.UserNotFoundException;
-import fr.cocoraid.babouinmalin.model.User;
+import fr.cocoraid.babouinmalin.model.user.User;
 
 import java.util.List;
 import java.util.UUID;
@@ -17,7 +17,10 @@ public interface UserService  {
 
     User getUser(String email) throws UserNotFoundException;
 
+    boolean isUserExists(String email);
 
     void deleteUser(UUID id);
+
+    int getUserAmount();
 
 }

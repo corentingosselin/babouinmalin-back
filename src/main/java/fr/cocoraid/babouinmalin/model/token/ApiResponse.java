@@ -1,4 +1,4 @@
-package fr.cocoraid.babouinmalin.model;
+package fr.cocoraid.babouinmalin.model.token;
 
 public class ApiResponse<T> {
 

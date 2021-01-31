@@ -1,8 +1,7 @@
 package fr.cocoraid.babouinmalin.controller;
 
 import fr.cocoraid.babouinmalin.dao.UserRepository;
-import fr.cocoraid.babouinmalin.model.ApiResponse;
-import fr.cocoraid.babouinmalin.model.User;
+import fr.cocoraid.babouinmalin.model.user.User;
 import fr.cocoraid.babouinmalin.payload.request.LoginRequest;
 import fr.cocoraid.babouinmalin.payload.request.SignupRequest;
 import fr.cocoraid.babouinmalin.payload.response.JwtResponse;
@@ -22,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -74,14 +74,8 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User is still online"));
     }
 
-    @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity
-                    .badRequest()
-                    .body(new MessageResponse("Error: Email is already in use!"));
-        }
 
+    private void register(SignupRequest signUpRequest) {
         // Create new user's account
         User user = new User(
                 signUpRequest.getName(),
@@ -91,6 +85,22 @@ public class AuthController {
 
         userService.createUser(user);
         userRepository.save(user);
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("L'email est déjà utilisé pour ce compte");
+        }
+        register(signUpRequest);
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+    }
+
+    @PostMapping("/register/users")
+    public ResponseEntity<?> registerUsers(@Valid @RequestBody List<SignupRequest> signUpRequest) {
+        signUpRequest.stream().filter(r -> !userRepository.existsByEmail(r.getEmail())).forEach(this::register);
+        return ResponseEntity.ok(new MessageResponse("Users registered successfully!"));
     }
 }

@@ -1,4 +1,4 @@
-package fr.cocoraid.babouinmalin.model;
+package fr.cocoraid.babouinmalin.model.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

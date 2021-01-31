@@ -2,26 +2,28 @@ package fr.cocoraid.babouinmalin.controller;
 
 
 import fr.cocoraid.babouinmalin.exceptions.UserNotFoundException;
-import fr.cocoraid.babouinmalin.model.User;
-import fr.cocoraid.babouinmalin.payload.response.MessageResponse;
+import fr.cocoraid.babouinmalin.model.user.User;
+import fr.cocoraid.babouinmalin.model.user.UserEmailUpdate;
+import fr.cocoraid.babouinmalin.model.user.UserPasswordUpdate;
 import fr.cocoraid.babouinmalin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 
 import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
+@CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 public class UserController {
 
     @Autowired
     UserService userService;
-
-
+    @Autowired
+    PasswordEncoder encoder;
 
     // Get All Notes
     @GetMapping("/users")
@@ -29,16 +31,7 @@ public class UserController {
         return userService.listAllUser();
     }
 
-    // Create a new Note
-   /* @PostMapping("/users/register")
-    public EntityModel<User> createUser(@Valid @RequestBody User user) throws UserNotFoundException {
-        User created = userService.createUser(user);
-        EntityModel<User> resource = EntityModel.of(created);
-        resource.add(
-                linkTo(methodOn(this.getClass()).getUserById(created.getId())).withSelfRel()
-        );
-        return resource;
-    }*/
+
 
     // Get a Single user
     @GetMapping("/users/{id}")
@@ -48,15 +41,44 @@ public class UserController {
     }
 
     // Update user
-    @PutMapping("/users/{id}")
-    public User updateUser(@PathVariable(value = "id") UUID userId,
-                           @Valid @RequestBody User userDetails) throws UserNotFoundException {
+    @PutMapping("/users/email/{id}")
+    public ResponseEntity<?> updateUser(@PathVariable(value = "id") UUID userId,
+                           @Valid @RequestBody UserEmailUpdate userUpdate) throws UserNotFoundException {
 
         User user = userService.getUser(userId);
-        user.setName(userDetails.getName());
-        user.setSurname(userDetails.getSurname());
-        User updatedUser = userService.saveUser(user);
-        return updatedUser;
+        if(!user.getEmail().equals(userUpdate.getOldEmail())) {
+            return new ResponseEntity<>("L'ancienne addresse email ne correspond pas", HttpStatus.BAD_REQUEST);
+        }
+        // check if new address does not already exists
+        if(userService.isUserExists(userUpdate.getNewEmail())) {
+            return new ResponseEntity<>("L'addresse email appartient déjà à un autre utilisateur", HttpStatus.BAD_REQUEST);
+        }
+        user.setEmail(userUpdate.getNewEmail());
+        userService.saveUser(user);
+        return new ResponseEntity<>("L'addresse mail a été mise à jour !", HttpStatus.OK);
+    }
+
+    // Update user
+    @PutMapping("/users/password/{id}")
+    public ResponseEntity<?> updateUserPassword(@PathVariable(value = "id") UUID userId,
+                                        @Valid @RequestBody UserPasswordUpdate userUpdate) throws UserNotFoundException {
+
+        if(!userUpdate.getPassword().equals(userUpdate.getConfirmPassword())) {
+            return new ResponseEntity<>("Les mots de passe ne sont pas identiques", HttpStatus.BAD_REQUEST);
+        }
+
+        if(!userUpdate.getPassword().equals(userUpdate.getOldPassword())) {
+            return new ResponseEntity<>("Le nouveau mot de passe doit être différent", HttpStatus.BAD_REQUEST);
+        }
+
+        User user = userService.getUser(userId);
+        if(!encoder.matches(userUpdate.getOldPassword(),user.getPassword())) {
+            return new ResponseEntity<>("Votre ancien mot de passe ne correspond pas", HttpStatus.BAD_REQUEST);
+        }
+
+        user.setPassword(encoder.encode(userUpdate.getPassword()));
+        userService.saveUser(user);
+        return ResponseEntity.ok().build();
     }
 
     // Delete a Note

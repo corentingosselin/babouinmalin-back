@@ -2,7 +2,7 @@ package fr.cocoraid.babouinmalin.service.impl;
 
 import fr.cocoraid.babouinmalin.dao.UserRepository;
 import fr.cocoraid.babouinmalin.exceptions.UserNotFoundException;
-import fr.cocoraid.babouinmalin.model.User;
+import fr.cocoraid.babouinmalin.model.user.User;
 import fr.cocoraid.babouinmalin.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -54,8 +54,18 @@ public class UserServiceImpl implements UserDetailsService, UserService {
                 .orElseThrow(() -> new UserNotFoundException(email));
     }
 
+    @Override
+    public boolean isUserExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);
+    }
+
+    @Override
+    public int getUserAmount() {
+        return userRepository.findAll().size();
     }
 
     @Override
