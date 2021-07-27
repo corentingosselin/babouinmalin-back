@@ -11,7 +11,7 @@ You need to run the back end:
 
 - mysql server
 - [minio server](https://github.com/minio/minio) image database
-- depencies from the pom.xml
+- dependencies from the pom.xml
 
 ## Usage
 
